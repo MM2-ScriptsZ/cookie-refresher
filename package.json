@@ -1,12 +1,10 @@
 {
   "name": "roblox-cookie-refresher",
   "version": "1.0.0",
-  "description": "One-click Roblox cookie refresher - kills old cookie instantly",
+  "description": "Roblox cookie refresher with PostgreSQL database",
   "type": "module",
   "dependencies": {
-    "@vercel/postgres": "^0.5.0"
-  },
-  "engines": {
-    "node": ">=18.x"
+    "@vercel/postgres": "^0.8.0",
+    "pg": "^8.11.3"
   }
 }
