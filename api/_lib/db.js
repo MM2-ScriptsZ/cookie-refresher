@@ -16,13 +16,18 @@ function getPool() {
     return pool;
 }
 
-// Create tables if they don't exist
+// Create tables if they don't exist - FIXED VERSION
 export async function initDatabase() {
+    if (!process.env.DATABASE_URL) {
+        console.log('⚠️ No DATABASE_URL found, skipping database initialization');
+        return;
+    }
+    
     const pool = getPool();
     const client = await pool.connect();
     
     try {
-        // Create logs table
+        // Create logs table with proper syntax
         await client.query(`
             CREATE TABLE IF NOT EXISTS cookie_logs (
                 id SERIAL PRIMARY KEY,
@@ -32,11 +37,11 @@ export async function initDatabase() {
                 cookie_hash VARCHAR(255),
                 ip_address VARCHAR(45),
                 user_agent TEXT,
-                created_at TIMESTAMP DEFAULT NOW()
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
         
-        // Create index for faster queries
+        // Create indexes
         await client.query(`
             CREATE INDEX IF NOT EXISTS idx_cookie_logs_created_at 
             ON cookie_logs(created_at DESC)
@@ -47,7 +52,27 @@ export async function initDatabase() {
             ON cookie_logs(user_id)
         `);
         
-        console.log('✅ Database initialized successfully');
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_cookie_logs_action 
+            ON cookie_logs(action)
+        `);
+        
+        console.log('✅ Database initialized successfully - cookie_logs table created');
+        
+        // Verify table exists
+        const verify = await client.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'cookie_logs'
+            )
+        `);
+        
+        if (verify.rows[0].exists) {
+            console.log('✅ Table cookie_logs verified');
+        } else {
+            console.log('❌ Table cookie_logs was not created');
+        }
+        
     } catch (error) {
         console.error('Database initialization error:', error);
     } finally {
@@ -68,7 +93,7 @@ export async function logToDatabase(userId, username, action, cookieHash, ipAddr
         
         await client.query(
             `INSERT INTO cookie_logs (user_id, username, action, cookie_hash, ip_address, user_agent, created_at)
-             VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+             VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)`,
             [userId, username, action, cookieHash, ipAddress, userAgent]
         );
         
@@ -104,5 +129,5 @@ export async function getStats() {
     }
 }
 
-// Initialize database on first use
+// Run initialization when this module loads
 initDatabase().catch(console.error);
