@@ -1,4 +1,7 @@
-import { logToDatabase, getStats } from './_lib/db.js';
+import { logToDatabase, getStats, initDatabase } from './_lib/db.js';
+
+// Ensure database is initialized when API loads
+await initDatabase();
 
 export default async function handler(req, res) {
     // Enable CORS
